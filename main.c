@@ -23,7 +23,23 @@ int main()
 
     busy_wait_ms(UINT32_C(2000));
 
+    debug1_set_color(DEBUG_COLOR_CYAN);
+
+    busy_wait_ms(UINT32_C(2000));
+
     debug1_set_color(DEBUG_COLOR_BLUE);
+
+    busy_wait_ms(UINT32_C(2000));
+
+    debug1_set_color(DEBUG_COLOR_MAGENTA);
+
+    busy_wait_ms(UINT32_C(2000));
+
+    debug1_set_color(DEBUG_COLOR_GREEN);
+
+    busy_wait_ms(UINT32_C(2000));
+
+    debug1_set_color(DEBUG_COLOR_YELLOW);
 
     busy_wait_ms(UINT32_C(2000));
 

@@ -54,7 +54,7 @@
 #define PWM_CC_BIT_0            UINT16_C(40)
 
 /*
-** @brief   
+** @brief   PWM Counter Compare Value for 
 */
 #define PWM_CC_BIT_1            UINT16_C(90)
 
@@ -93,7 +93,7 @@
 #define ADDR_SET    (volatile uint32_t *)(PWM_BASE + PWM_SLICE_ADDR + PWM_CC_ADDR_OFFSET)
 
 /*
-** @brief   Status of Device Memory Access
+** @brief   Output Pixel Data Encoded for PWM
 */
 struct neopixel_led_data
 {
@@ -102,9 +102,31 @@ struct neopixel_led_data
 };
 
 /*
+** @brief   LED Color Setting
+*/
+struct neopixel_led_color
+{
+    enum debug_color_e   m_color;
+    bool                 m_subpixels[SUBPIXELS_NUM];
+};
+
+/*
 ** @brief   Buffer for Send and Receive Data on I2C Bus
 */
 static struct neopixel_led_data buffer;
+
+/*
+** @brief   Debug NeoPixel LED Defined Colors
+*/
+static struct neopixel_led_color colors[6] =
+{
+    { DEBUG_COLOR_RED,     {  true, false, false } },
+    { DEBUG_COLOR_GREEN,   { false,  true, false } },
+    { DEBUG_COLOR_BLUE,    { false, false,  true } },
+    { DEBUG_COLOR_YELLOW,  {  true,  true, false } },
+    { DEBUG_COLOR_CYAN,    { false,  true,  true } },
+    { DEBUG_COLOR_MAGENTA, {  true, false,  true } },
+};
 
 static uint neopixel_led_dma;
 
@@ -169,30 +191,23 @@ void debug1_set_color (enum debug_color_e color)
     /* Wait for previous transfer complete */
     dma_channel_wait_for_finish_blocking(neopixel_led_dma);
 
-    switch (color)
+    uint_fast8_t i = UINT8_C(0);
+
+    for (i = UINT8_C(0); i < 6; i++)
     {
-        case DEBUG_COLOR_RED:
+        if (colors[i].m_color == color)
         {
-            set_subpixels(true, false, false);
+            set_subpixels(colors[i].m_subpixels[0],
+                          colors[i].m_subpixels[1],
+                          colors[i].m_subpixels[2]);
+
             break;
         }
+    }
 
-        case DEBUG_COLOR_GREEN:
-        {
-            set_subpixels(false, true, false);
-            break;
-        }
-
-        case DEBUG_COLOR_BLUE:
-        {
-            set_subpixels(false, false, true);
-            break;
-        }
-
-        default:
-        {
-            set_subpixels(false, false, false);
-        }
+    if (i == 6)
+    {
+        set_subpixels(false, false, false);
     }
 
     /* Trigger next transfer */
