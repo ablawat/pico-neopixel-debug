@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 17)
 pico_sdk_init()
 
 # target sources
-add_executable(neopixel main.c debug-1.c)
+add_executable(neopixel main.c debug-1.c ws2812b.c)
 
 # target dependencies
 target_link_libraries(neopixel pico_stdlib hardware_gpio hardware_pwm hardware_dma)
