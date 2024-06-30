@@ -23,6 +23,7 @@ typedef enum debug_color_e
     DEBUG_COLOR_YELLOW,
     DEBUG_COLOR_CYAN,
     DEBUG_COLOR_MAGENTA,
+    DEBUG_COLOR_NONE,
 }
 debug_color_e;
 

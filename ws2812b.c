@@ -4,6 +4,7 @@
 
 #include "ws2812b.h"
 #include "pwm.h"
+#include "pico/stdlib.h"
 #include "hardware/gpio.h"
 #include "hardware/pwm.h"
 #include "hardware/dma.h"
@@ -30,7 +31,7 @@
 /*
 ** @brief   Number of Bits Used for LED Reset Pulse
 */
-#define RESET_BITS_NUM          UINT16_C(90)
+#define RESET_BITS_NUM          UINT16_C(280)
 
 /*
 ** @brief   Bit Offsets for Red, Green and Blue Subpixels
@@ -46,12 +47,12 @@
 typedef struct neopixel_led_data
 {
     /*
-    ** @brief   Area for Encoded Pixel Color
+    ** @brief   Encoded Pixel Color
     */
     uint32_t m_pixel[PIXEL_BITS_NUM];
 
     /*
-    ** @brief   Area for Reset Pulse
+    ** @brief   Encoded Reset Pulse
     */
     uint32_t m_reset;
 }
@@ -60,12 +61,17 @@ neopixel_led_data;
 /*
 ** @brief   Buffer for Send Data Through PWM
 */
-static neopixel_led_data    debug_pixel_output;
+static neopixel_led_data    neopixel_output;
 
 /*
 ** @brief   DMA Channel Used for PWM
 */
-static uint                 neopixel_led_dma;
+static uint                 neopixel_dma;
+
+/*
+** @brief   Time Counter Used for Delay
+*/
+static uint64_t             neopixel_time;
 
 /**************************************************************************************************/
 /**                      Local Function Declarations                                             **/
@@ -85,14 +91,15 @@ void ws2812b_init (void)
     /* initialize pixel color data */
     for (uint_fast8_t i = UINT8_C(0); i < PIXEL_BITS_NUM; i++)
     {
-        debug_pixel_output.m_pixel[i] = PIXEL_BIT_0;
+        neopixel_output.m_pixel[i] = PIXEL_BIT_0;
     }
 
     /* initialize reset pulse data */
-    debug_pixel_output.m_reset = PWM_CC_LOW;
+    neopixel_output.m_reset = PWM_CC_LOW;
 
     /* configure PWM slice and channel for NeoPixel output */
     gpio_set_function(DEBUG_NEOPIXEL_OUTPUT_PIN, GPIO_FUNC_PWM);
+    //gpio_set_function(1, GPIO_FUNC_PWM);
 
     pwm_set_wrap       (DEBUG_NEOPIXEL_PWM_SLICE_NUM, PWM_WRAP_1MHZ);
     pwm_set_chan_level (DEBUG_NEOPIXEL_PWM_SLICE_NUM, DEBUG_NEOPIXEL_PWM_CHANNEL_NUM, PWM_CC_LOW);
@@ -107,7 +114,7 @@ void ws2812b_init (void)
 
     }
 
-    neopixel_led_dma = pwm_dma_channel;
+    neopixel_dma = pwm_dma_channel;
 
     /* configure DMA channel for NeoPixel output */
     dma_channel_config pwm_dma_channel_config = dma_channel_get_default_config(pwm_dma_channel);
@@ -121,7 +128,7 @@ void ws2812b_init (void)
     dma_channel_configure(pwm_dma_channel,
                           &pwm_dma_channel_config,
                           ADDR_SET,
-                          &debug_pixel_output,
+                          &neopixel_output,
                           PIXEL_BITS_NUM + UINT8_C(1),
                           false);
 }
@@ -132,7 +139,7 @@ void ws2812b_init (void)
 void ws2812b_set_pixel (uint8_t red, uint8_t green, uint8_t blue)
 {
     /* wait until previous transfer is completed */
-    dma_channel_wait_for_finish_blocking(neopixel_led_dma);
+    dma_channel_wait_for_finish_blocking(neopixel_dma);
 
     /* write new color data */
     set_subpixels(red, green, blue);
@@ -144,10 +151,26 @@ void ws2812b_set_pixel (uint8_t red, uint8_t green, uint8_t blue)
 void ws2812b_send (void)
 {
     /* wait until previous transfer is completed */
-    dma_channel_wait_for_finish_blocking(neopixel_led_dma);
+    while (true)
+    {
+        /* get current system time counter */
+        uint64_t time_current = time_us_64();
+
+        /* get duration from start of previous transfer */
+        time_current -= neopixel_time;
+
+        if (time_current > (PIXEL_BITS_NUM + RESET_BITS_NUM))
+        {
+            /* get current system time counter */
+            neopixel_time = time_us_64();
+
+            /* transfer has completed */
+            break;
+        }
+    }
 
     /* trigger next transfer */
-    dma_channel_set_read_addr(neopixel_led_dma, &debug_pixel_output, true);
+    dma_channel_set_read_addr(neopixel_dma, &neopixel_output, true);
 }
 
 /*
@@ -163,11 +186,11 @@ static void set_subpixels (uint8_t red, uint8_t green, uint8_t blue)
     {
         if ((green && mask) > UINT8_C(0))
         {
-            debug_pixel_output.m_pixel[SUBPIXEL_OFFSET_GREEN + i] = PIXEL_BIT_1;
+            neopixel_output.m_pixel[SUBPIXEL_OFFSET_GREEN + i] = PIXEL_BIT_1;
         }
         else
         {
-            debug_pixel_output.m_pixel[SUBPIXEL_OFFSET_GREEN + i] = PIXEL_BIT_0;
+            neopixel_output.m_pixel[SUBPIXEL_OFFSET_GREEN + i] = PIXEL_BIT_0;
         }
 
         mask = mask >> UINT8_C(1);
@@ -182,11 +205,11 @@ static void set_subpixels (uint8_t red, uint8_t green, uint8_t blue)
     {
         if ((red && mask) > UINT8_C(0))
         {
-            debug_pixel_output.m_pixel[SUBPIXEL_OFFSET_RED + i] = PIXEL_BIT_1;
+            neopixel_output.m_pixel[SUBPIXEL_OFFSET_RED + i] = PIXEL_BIT_1;
         }
         else
         {
-            debug_pixel_output.m_pixel[SUBPIXEL_OFFSET_RED + i] = PIXEL_BIT_0;
+            neopixel_output.m_pixel[SUBPIXEL_OFFSET_RED + i] = PIXEL_BIT_0;
         }
 
         mask = mask >> UINT8_C(1);
@@ -201,11 +224,11 @@ static void set_subpixels (uint8_t red, uint8_t green, uint8_t blue)
     {
         if ((blue && mask) > UINT8_C(0))
         {
-            debug_pixel_output.m_pixel[SUBPIXEL_OFFSET_BLUE + i] = PIXEL_BIT_1;
+            neopixel_output.m_pixel[SUBPIXEL_OFFSET_BLUE + i] = PIXEL_BIT_1;
         }
         else
         {
-            debug_pixel_output.m_pixel[SUBPIXEL_OFFSET_BLUE + i] = PIXEL_BIT_0;
+            neopixel_output.m_pixel[SUBPIXEL_OFFSET_BLUE + i] = PIXEL_BIT_0;
         }
 
         mask = mask >> UINT8_C(1);

@@ -10,9 +10,18 @@
 /**************************************************************************************************/
 
 /*
-** @brief   Number of Subpixels Used in LED Pixel
+** @brief   Number of LED Pixel Subpixels
 */
 #define LED_SUBPIXELS_NUM           UINT8_C(3)
+
+/*
+** @brief   Number of LED Pixel Colors
+*/
+#define LED_COLORS_NUM              UINT8_C(7)
+
+/**************************************************************************************************/
+/**                      Local Types                                                             **/
+/**************************************************************************************************/
 
 /*
 ** @brief   LED Color Setting
@@ -26,8 +35,9 @@ struct neopixel_led_color
 /*
 ** @brief   Debug NeoPixel LED Defined Colors
 */
-static struct neopixel_led_color colors[6] =
+static struct neopixel_led_color colors[LED_COLORS_NUM] =
 {
+    { DEBUG_COLOR_NONE,    { UINT8_C(0x00), UINT8_C(0x00), UINT8_C(0x00) } },
     { DEBUG_COLOR_RED,     { UINT8_C(0xFF), UINT8_C(0x00), UINT8_C(0x00) } },
     { DEBUG_COLOR_GREEN,   { UINT8_C(0x00), UINT8_C(0xFF), UINT8_C(0x00) } },
     { DEBUG_COLOR_BLUE,    { UINT8_C(0x00), UINT8_C(0x00), UINT8_C(0xFF) } },
@@ -35,6 +45,11 @@ static struct neopixel_led_color colors[6] =
     { DEBUG_COLOR_CYAN,    { UINT8_C(0x00), UINT8_C(0xFF), UINT8_C(0xFF) } },
     { DEBUG_COLOR_MAGENTA, { UINT8_C(0xFF), UINT8_C(0x00), UINT8_C(0xFF) } },
 };
+
+/*
+** @brief   Debug NeoPixel LED Displayed Color
+*/
+static debug_color_e    color_current;
 
 /**************************************************************************************************/
 /**                      Global Functions                                                        **/
@@ -45,6 +60,9 @@ static struct neopixel_led_color colors[6] =
 */
 void debug1_init (void)
 {
+    /* set pixel color */
+    color_current = DEBUG_COLOR_NONE;
+
     /* initialize pixel color data */
     ws2812b_init();
 }
@@ -54,19 +72,25 @@ void debug1_init (void)
 */
 void debug1_set_color (enum debug_color_e color)
 {
-    for (uint_fast8_t i = UINT8_C(0); i < 6; i++)
+    if (color_current != color)
     {
-        if (colors[i].m_color == color)
+        for (uint_fast8_t i = UINT8_C(0); i < LED_COLORS_NUM; i++)
         {
-            ws2812b_set_pixel(colors[i].m_subpixels[0],
-                              colors[i].m_subpixels[1],
-                              colors[i].m_subpixels[2]);
+            if (colors[i].m_color == color)
+            {
+                ws2812b_set_pixel(colors[i].m_subpixels[0],
+                                  colors[i].m_subpixels[1],
+                                  colors[i].m_subpixels[2]);
 
-            break;
+                color_current = color;
+
+                break;
+            }
         }
-    }
 
-    ws2812b_send();
+        /* apply new color */
+        ws2812b_send();
+    }
 }
 
 /*
@@ -74,10 +98,25 @@ void debug1_set_color (enum debug_color_e color)
 */
 void debug1_turn_off (void)
 {
-    ws2812b_set_pixel(UINT8_C(0x00), UINT8_C(0x00), UINT8_C(0x00));
+    if (color_current != DEBUG_COLOR_NONE)
+    {
+        for (uint_fast8_t i = UINT8_C(0); i < LED_COLORS_NUM; i++)
+        {
+            if (colors[i].m_color == DEBUG_COLOR_NONE)
+            {
+                ws2812b_set_pixel(colors[i].m_subpixels[0],
+                                  colors[i].m_subpixels[1],
+                                  colors[i].m_subpixels[2]);
 
-    /* trigger next transfer */
-    ws2812b_send();
+                color_current = DEBUG_COLOR_NONE;
+
+                break;
+            }
+        }
+
+        /* apply new color */
+        ws2812b_send();
+    }
 }
 
 /**************************************************************************************************/
