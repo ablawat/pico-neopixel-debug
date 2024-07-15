@@ -11,8 +11,8 @@
 /**                      Global Types                                                            **/
 /**************************************************************************************************/
 
-void ws2812b_init      (void);
-void ws2812b_set_pixel (uint8_t red, uint8_t green, uint8_t blue);
-void ws2812b_send      (void);
+void ws2812b_init         (void);
+void ws2812b_color_set    (uint8_t red, uint8_t green, uint8_t blue);
+void ws2812b_color_update (void);
 
 #endif

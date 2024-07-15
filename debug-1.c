@@ -58,7 +58,7 @@ static debug_color_e    color_current;
 /*
 ** @brief   Function
 */
-void debug1_init (void)
+void debug1_pixel_init (void)
 {
     /* set pixel color */
     color_current = DEBUG_COLOR_NONE;
@@ -70,7 +70,7 @@ void debug1_init (void)
 /*
 ** @brief   Function
 */
-void debug1_set_color (enum debug_color_e color)
+void debug1_pixel_color_set (debug_color_e color)
 {
     if (color_current != color)
     {
@@ -78,7 +78,7 @@ void debug1_set_color (enum debug_color_e color)
         {
             if (colors[i].m_color == color)
             {
-                ws2812b_set_pixel(colors[i].m_subpixels[0],
+                ws2812b_color_set(colors[i].m_subpixels[0],
                                   colors[i].m_subpixels[1],
                                   colors[i].m_subpixels[2]);
 
@@ -89,14 +89,14 @@ void debug1_set_color (enum debug_color_e color)
         }
 
         /* apply new color */
-        ws2812b_send();
+        ws2812b_color_update();
     }
 }
 
 /*
 ** @brief   Function
 */
-void debug1_turn_off (void)
+void debug1_pixel_turn_off (void)
 {
     if (color_current != DEBUG_COLOR_NONE)
     {
@@ -104,7 +104,7 @@ void debug1_turn_off (void)
         {
             if (colors[i].m_color == DEBUG_COLOR_NONE)
             {
-                ws2812b_set_pixel(colors[i].m_subpixels[0],
+                ws2812b_color_set(colors[i].m_subpixels[0],
                                   colors[i].m_subpixels[1],
                                   colors[i].m_subpixels[2]);
 
@@ -115,7 +115,7 @@ void debug1_turn_off (void)
         }
 
         /* apply new color */
-        ws2812b_send();
+        ws2812b_color_update();
     }
 }
 

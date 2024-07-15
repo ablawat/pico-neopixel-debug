@@ -7,55 +7,63 @@ int main()
 {
     stdio_init_all();
 
-    debug1_init();
+    debug1_pixel_init();
 
     busy_wait_ms(UINT32_C(4));
 
-    debug1_set_color(DEBUG_COLOR_RED);
+    debug1_pixel_color_set(DEBUG_COLOR_RED);
 
     busy_wait_ms(UINT32_C(300));
 
-    debug1_set_color(DEBUG_COLOR_GREEN);
+    debug1_pixel_color_set(DEBUG_COLOR_GREEN);
 
     busy_wait_ms(UINT32_C(4000));
 
-    debug1_set_color(DEBUG_COLOR_RED);
+    debug1_pixel_color_set(DEBUG_COLOR_RED);
 
     busy_wait_ms(UINT32_C(2000));
 
-    debug1_set_color(DEBUG_COLOR_CYAN);
+    debug1_pixel_color_set(DEBUG_COLOR_CYAN);
 
     busy_wait_ms(UINT32_C(2000));
 
-    debug1_set_color(DEBUG_COLOR_BLUE);
+    debug1_pixel_color_set(DEBUG_COLOR_BLUE);
 
     busy_wait_ms(UINT32_C(2000));
 
-    debug1_set_color(DEBUG_COLOR_MAGENTA);
+    debug1_pixel_color_set(DEBUG_COLOR_MAGENTA);
 
     busy_wait_ms(UINT32_C(2000));
 
-    debug1_set_color(DEBUG_COLOR_GREEN);
+    debug1_pixel_color_set(DEBUG_COLOR_GREEN);
 
     busy_wait_ms(UINT32_C(2000));
 
-    debug1_set_color(DEBUG_COLOR_YELLOW);
+    debug1_pixel_color_set(DEBUG_COLOR_YELLOW);
 
     busy_wait_ms(UINT32_C(2000));
 
-    debug1_turn_off();
+    debug1_pixel_turn_off();
 
     while (true)
     {
         busy_wait_ms(UINT32_C(4000));
 
-        debug1_set_color(DEBUG_COLOR_RED);
-        busy_wait_ms(UINT32_C(100));
-        debug1_set_color(DEBUG_COLOR_GREEN);
-        busy_wait_ms(UINT32_C(100));
-        debug1_set_color(DEBUG_COLOR_BLUE);
-        busy_wait_ms(UINT32_C(100));
-        debug1_turn_off();
+        debug1_pixel_color_set(DEBUG_COLOR_RED);
+        debug1_pixel_color_set(DEBUG_COLOR_GREEN);
+        debug1_pixel_color_set(DEBUG_COLOR_BLUE);
+
+        busy_wait_ms(UINT32_C(200));
+        debug1_pixel_color_set(DEBUG_COLOR_RED);
+
+        busy_wait_ms(UINT32_C(200));
+        debug1_pixel_color_set(DEBUG_COLOR_GREEN);
+
+        busy_wait_ms(UINT32_C(200));
+        debug1_pixel_color_set(DEBUG_COLOR_BLUE);
+
+        busy_wait_ms(UINT32_C(200));
+        debug1_pixel_turn_off();
     }
 
     return 0;

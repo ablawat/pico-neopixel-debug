@@ -1,5 +1,5 @@
-#ifndef DEBUG1_CFG_H
-#define DEBUG1_CFG_H
+#ifndef DEBUG1_CONFIG_H
+#define DEBUG1_CONFIG_H
 
 /**************************************************************************************************/
 /**                      Include Files                                                           **/

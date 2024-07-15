@@ -91,7 +91,7 @@ void ws2812b_init (void)
     /* initialize pixel color data */
     for (uint_fast8_t i = UINT8_C(0); i < PIXEL_BITS_NUM; i++)
     {
-        neopixel_output.m_pixel[i] = PIXEL_BIT_0;
+        neopixel_output.m_pixel[i] = PIXEL_BIT(PWM_CC_BIT_0);
     }
 
     /* initialize reset pulse data */
@@ -136,7 +136,7 @@ void ws2812b_init (void)
 /*
 ** @brief   Function
 */
-void ws2812b_set_pixel (uint8_t red, uint8_t green, uint8_t blue)
+void ws2812b_color_set (uint8_t red, uint8_t green, uint8_t blue)
 {
     /* wait until previous transfer is completed */
     dma_channel_wait_for_finish_blocking(neopixel_dma);
@@ -148,7 +148,7 @@ void ws2812b_set_pixel (uint8_t red, uint8_t green, uint8_t blue)
 /*
 ** @brief   Function
 */
-void ws2812b_send (void)
+void ws2812b_color_update (void)
 {
     /* wait until previous transfer is completed */
     while (true)
@@ -186,11 +186,11 @@ static void set_subpixels (uint8_t red, uint8_t green, uint8_t blue)
     {
         if ((green && mask) > UINT8_C(0))
         {
-            neopixel_output.m_pixel[SUBPIXEL_OFFSET_GREEN + i] = PIXEL_BIT_1;
+            neopixel_output.m_pixel[SUBPIXEL_OFFSET_GREEN + i] = PIXEL_BIT(PWM_CC_BIT_1);
         }
         else
         {
-            neopixel_output.m_pixel[SUBPIXEL_OFFSET_GREEN + i] = PIXEL_BIT_0;
+            neopixel_output.m_pixel[SUBPIXEL_OFFSET_GREEN + i] = PIXEL_BIT(PWM_CC_BIT_0);
         }
 
         mask = mask >> UINT8_C(1);
@@ -205,11 +205,11 @@ static void set_subpixels (uint8_t red, uint8_t green, uint8_t blue)
     {
         if ((red && mask) > UINT8_C(0))
         {
-            neopixel_output.m_pixel[SUBPIXEL_OFFSET_RED + i] = PIXEL_BIT_1;
+            neopixel_output.m_pixel[SUBPIXEL_OFFSET_RED + i] = PIXEL_BIT(PWM_CC_BIT_1);
         }
         else
         {
-            neopixel_output.m_pixel[SUBPIXEL_OFFSET_RED + i] = PIXEL_BIT_0;
+            neopixel_output.m_pixel[SUBPIXEL_OFFSET_RED + i] = PIXEL_BIT(PWM_CC_BIT_0);
         }
 
         mask = mask >> UINT8_C(1);
@@ -224,11 +224,11 @@ static void set_subpixels (uint8_t red, uint8_t green, uint8_t blue)
     {
         if ((blue && mask) > UINT8_C(0))
         {
-            neopixel_output.m_pixel[SUBPIXEL_OFFSET_BLUE + i] = PIXEL_BIT_1;
+            neopixel_output.m_pixel[SUBPIXEL_OFFSET_BLUE + i] = PIXEL_BIT(PWM_CC_BIT_1);
         }
         else
         {
-            neopixel_output.m_pixel[SUBPIXEL_OFFSET_BLUE + i] = PIXEL_BIT_0;
+            neopixel_output.m_pixel[SUBPIXEL_OFFSET_BLUE + i] = PIXEL_BIT(PWM_CC_BIT_0);
         }
 
         mask = mask >> UINT8_C(1);

@@ -6,7 +6,7 @@
 /**************************************************************************************************/
 
 #include <stdint.h>
-#include "cfg.h"
+#include "config.h"
 
 /**************************************************************************************************/
 /**                      Global Types                                                            **/
@@ -33,20 +33,6 @@
 #define PWM_CC_BIT_1            UINT16_C(90)
 
 /*
-** @brief   PWM Counter Compare Bit Shift
-*/
-#define PWM_CC_BIT_SHIFT        (DEBUG_NEOPIXEL_PWM_CHANNEL_NUM * UINT8_C(16))
-
-/*
-** @brief   
-*/
-#define PIXEL_BIT_0             ((uint32_t)(PWM_CC_BIT_0) << PWM_CC_BIT_SHIFT)
-/*
-** @brief   
-*/
-#define PIXEL_BIT_1             ((uint32_t)(PWM_CC_BIT_1) << PWM_CC_BIT_SHIFT)
-
-/*
 ** @brief   PWM Counter Compare Register Address Offset
 */
 #define PWM_CC_ADDR_OFFSET      UINT8_C(0x0C)
@@ -62,8 +48,18 @@
 #define PWM_SLICE_ADDR          (DEBUG_NEOPIXEL_PWM_SLICE_NUM * PWM_SLICE_SIZE)
 
 /*
+** @brief   PWM Counter Compare Bit Shift
+*/
+#define PWM_CC_BIT_SHIFT        (DEBUG_NEOPIXEL_PWM_CHANNEL_NUM * UINT8_C(16))
+
+/*
+** @brief   PWM Counter Compare 32-bit Register Value
+*/
+#define PIXEL_BIT(X)            ((uint32_t)(X) << PWM_CC_BIT_SHIFT)
+
+/*
 ** @brief   
 */
-#define ADDR_SET    (volatile uint32_t *)(PWM_BASE + PWM_SLICE_ADDR + PWM_CC_ADDR_OFFSET)
+#define ADDR_SET                (volatile uint32_t *)(PWM_BASE + PWM_SLICE_ADDR + PWM_CC_ADDR_OFFSET)
 
 #endif
